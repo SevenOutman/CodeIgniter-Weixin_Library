@@ -7,8 +7,8 @@
 | 参数须与微信公众平台一致
 |
 */
-$config['appid']  = 'wx59d46d023828d314';
-$config['secret'] = '4ea632f41f2123cd8a55c6188b091361';
+$config['appid']  = ''; // 必填
+$config['secret'] = ''; // 必填
 $config['token']  = '';
 
 /*
