@@ -60,5 +60,8 @@ $this->wx->getWxUser();
 $this-wx->signPackage();
 ```
 
+## Note
+你的项目根目录需要有读写权限, `Wx_library`才能更好地工作。因为它需要在文件中缓存`access_token`和`jsapi_ticket`。
+
 ## License
 MIT License. Check the `LICENSE` file.
