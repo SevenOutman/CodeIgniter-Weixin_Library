@@ -1,0 +1,2 @@
+# CodeIgniter-Weixin_Library
+适用于CodeIgniter框架的微信网页授权模块
