@@ -1,5 +1,5 @@
 # CodeIgniter-Weixin_Library
-即插即用微信网页授权模块, 适用于CodeIgniter框架
+即插即用微信网页授权模块, 适用于[CodeIgniter](https://github.com/bcit-ci/CodeIgniter)框架
 
 ## 起步
 该模块为即插即用模块, 只需`clone`该项目即可开始使用
