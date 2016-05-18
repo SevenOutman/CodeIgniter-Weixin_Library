@@ -29,14 +29,17 @@ CodeIgniter-Weixin_Library/
 修改`wx_library.php`配置文件, 填入所开发公众号的信息:
 ```
 <?php
-/**
- * 微信公众号配置
- */
-$config = array(
-    'appid'  => '', // 必填
-    'secret' => '', // 必填
-    'token'  => '',
-);
+/*
+|--------------------------------------------------------------------------
+| 微信公众号配置
+|--------------------------------------------------------------------------
+|
+| 参数须与微信公众平台一致
+|
+*/
+$config['appid']  = 'wx59d46d023828d314';
+$config['secret'] = '4ea632f41f2123cd8a55c6188b091361';
+$config['token']  = '';
 ```
 
 ### 加载
@@ -50,8 +53,8 @@ $this->load->library('Wx_library', null, 'wx')
 ### API
 `Wx_library`提供2个API:
 ```
-// 发起微信授权登录
-$this->wx->login();
+// 获取当前微信用户
+$this->wx->getWxUser();
 
 // 返回微信 js sdk 配置选项 signPackage
 $this-wx->signPackage();

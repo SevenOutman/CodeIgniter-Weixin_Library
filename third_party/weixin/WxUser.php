@@ -29,6 +29,17 @@ class WxUser
     public $date_added;
     public $date_modified;
 
+    public function __construct($data = array())
+    {
+        if ($data) {
+            foreach ($data as $key => $value) {
+                if (property_exists($this, $key)) {
+                    $this->$key = $value;
+                }
+            }
+        }
+    }
+    
     /**
      * 0(640), 46, 64, 96, 132
      * @param int $size

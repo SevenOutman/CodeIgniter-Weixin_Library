@@ -8,6 +8,7 @@ require_once APPPATH . 'third_party/weixin/Wx.php';
  */
 class Wx_library
 {
+    private $config;
     /** @var Wx $wx */
     private $wx;
 
@@ -16,8 +17,10 @@ class Wx_library
 
     public function __construct(array $config)
     {
+        $this->config = $config;
+
         $this->CI = &get_instance();
-        $this->wx = new Wx($config);
+        $this->wx = new Wx($this->config);
 
         if (!$this->checkWxUserTable()) {
             show_error("Table `wx_user` doesn't exist.");
@@ -85,43 +88,120 @@ class Wx_library
      * @return bool
      * 登录成功返回 true, 否则返回 false
      */
-    public function login()
+    protected function login()
     {
         try {
-            $userInfo = $this->wx->getUserInfo(true);
-
-            $data = array(
-                'openid'        => $userInfo['openid'],
-                'nickname'      => $userInfo['nickname'],
-                'sex'           => $userInfo['sex'],
-                'province'      => $userInfo['province'],
-                'city'          => $userInfo['city'],
-                'country'       => $userInfo['country'],
-                'headimgurl'    => $userInfo['headimgurl'],
-                'unionid'       => $userInfo['unionid'],
-                'date_modified' => date('Y-m-d H:i:s'),
-            );
-
-            /** @var object|null $wx_user */
-            $wx_user = $this->CI->db->get_where('wx_user', array('openid' => $data['openid']))
-                                    ->row();
-            if (!$wx_user) {
-                $data['date_added'] = $data['date_modified'];
-                $this->CI->db->insert('wx_user', $data);
-                $wx_user_id = $this->CI->db->insert_id();
-            } else {
-                $this->CI->db
-                    ->where('wx_user_id', $wx_user->wx_user_id)
-                    ->update('wx_user', $data);
-                $wx_user_id = $wx_user->wx_user_id;
-            }
-            $this->CI->session->set_userdata('wx_user_id', $wx_user_id);
-
-            $this->redirectCleanUrl();
+            return $this->wx->getUserInfo(true);
         }
         catch (WxException $e) {
-            return false;
+            return null;
         }
+    }
+
+    public function getWxUser()
+    {
+        if ($user = $this->loadWxUser()) {
+            return $user;
+        }
+
+        if ($userInfo = $this->login()) {
+
+            return $this->saveWxUser($userInfo);
+        }
+
+        return null;
+    }
+
+
+    /**
+     * @return mixed|null
+     */
+    protected function loadWxUser()
+    {
+        /** @var CI_Session $session */
+        $session = $this->CI->session;
+        $key     = $this->config['wx_user_session_key'];
+
+        if (!$this->config['cache_wx_user']) {
+            if ($data = $session->userdata("tmp_$key")) {
+                $session->unset_userdata("tmp_$key");
+
+                return new WxUser($data);
+            }
+
+            return null;
+        }
+
+        if ($this->config['cache_type'] == 'session') {
+            if ($data = $session->userdata($key)) {
+                return new WxUser($data);
+            }
+
+            return null;
+        }
+
+        if ($this->config['cache_type'] == 'database') {
+            $table_name = $this->config['wx_user_table_name'];
+            $id         = $session->userdata($key);
+            $wx_user    = $this->CI->db->get_where($table_name, array('wx_user_id' => $id))
+                                       ->row(0, 'WxUser');
+
+            return $wx_user;
+        }
+
+        return null;
+    }
+
+    protected function saveWxUser($userInfo)
+    {
+
+        $data    = array(
+            'openid'        => $userInfo['openid'],
+            'nickname'      => $userInfo['nickname'],
+            'sex'           => $userInfo['sex'],
+            'province'      => $userInfo['province'],
+            'city'          => $userInfo['city'],
+            'country'       => $userInfo['country'],
+            'headimgurl'    => $userInfo['headimgurl'],
+            'unionid'       => $userInfo['unionid'],
+            'date_modified' => date('Y-m-d H:i:s'),
+        );
+        $wx_user = new WxUser($data);
+
+        /** @var CI_Session $session */
+        $session = $this->CI->session;
+        $key     = $this->config['wx_user_session_key'];
+
+        if (!$this->config['cache_wx_user']) {
+            $session->set_userdata("tmp_$key", $data);
+        } else {
+            if ($this->config['cache_type'] == 'session') {
+                $session->set_userdata($key, $data);
+            } elseif ($this->config['cache_type'] == 'database') {
+
+                $table_name  = $this->config['wx_user_table_name'];
+                $stored_user = $this->CI->db->get_where($table_name, array('openid' => $wx_user->openid))
+                                            ->row();
+
+                if (!$stored_user) {
+                    $data['date_added'] = $data['date_modified'];
+                    $this->CI->db->insert($table_name, $data);
+                    $wx_user_id = $this->CI->db->insert_id();
+                } else {
+                    $this->CI->db
+                        ->where('wx_user_id', $stored_user->wx_user_id)
+                        ->update($table_name, $data);
+                    $wx_user_id = $stored_user->wx_user_id;
+                }
+
+                $session->set_userdata($key, $wx_user_id);
+
+            }
+
+        }
+        $this->redirectCleanUrl();
+
+        return $wx_user;
     }
 
     /**
