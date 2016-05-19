@@ -14,43 +14,7 @@ class WxJsApi
 
     protected static $instance;
 
-    protected static $jsApiList = array(
-        'onMenuShareTimeline',
-        'onMenuShareAppMessage',
-        'onMenuShareQQ',
-        'onMenuShareWeibo',
-        'onMenuShareQZone',
-        'startRecord',
-        'stopRecord',
-        'onVoiceRecordEnd',
-        'playVoice',
-        'pauseVoice',
-        'stopVoice',
-        'onVoicePlayEnd',
-        'uploadVoice',
-        'downloadVoice',
-        'chooseImage',
-        'previewImage',
-        'uploadImage',
-        'downloadImage',
-        'translateVoice',
-        'getNetworkType',
-        'openLocation',
-        'getLocation',
-        'hideOptionMenu',
-        'showOptionMenu',
-        'hideMenuItems',
-        'showMenuItems',
-        'hideAllNonBaseMenuItem',
-        'showAllNonBaseMenuItem',
-        'closeWindow',
-        'scanQRCode',
-        'chooseWXPay',
-        'openProductSpecificView',
-        'addCard',
-        'chooseCard',
-        'openCard',
-    );
+    protected static $jsApiList = array();
 
     /**
      * WxJsApi constructor.
@@ -62,6 +26,8 @@ class WxJsApi
     {
         $this->appid  = isset($wx_config['appid']) ? $wx_config['appid'] : '';
         $this->secret = isset($wx_config['secret']) ? $wx_config['secret'] : '';
+
+        self::$jsApiList = array_merge(self::$jsApiList, $wx_config['js_api_list']);
     }
 
     /**
