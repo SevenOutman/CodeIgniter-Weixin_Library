@@ -1,4 +1,6 @@
 <?php
+require_once 'WxConfig.php';
+require_once 'WxUrl.php';
 
 /**
  * Class WxCache
@@ -75,5 +77,25 @@ class WxCache
         $fp                   = fopen(self::FILENAME_ACCESS_TOKEN, "w");
         fwrite($fp, json_encode($data));
         fclose($fp);
+    }
+
+    /**
+     * 手动刷新 access_token
+     */
+    public static function refreshAccessToken()
+    {
+        $url = WxUrl::urlAccessToken(WxConfig::$appid, WxConfig::$secret);
+        $res = WxUrl::curlJSON($url);
+
+        if (!property_exists($res, 'access_token')) {
+            throw new WxException($res->errmsg, $res->errcode);
+        }
+        $access_token = $res->access_token;
+
+        if ($access_token) {
+            WxCache::setAccessToken($access_token);
+        }
+
+        return $access_token;
     }
 }

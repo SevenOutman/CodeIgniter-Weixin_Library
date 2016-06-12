@@ -47,13 +47,16 @@ class Wx_library
      */
     protected function createWxUserTable()
     {
-        $db     = $this->CI->db;
+
+        $db         = $this->CI->db;
+        $table_name = $this->config['wx_user_table_name'];
+
         $sql    = array(
             'SET NAMES utf8;',
             'SET FOREIGN_KEY_CHECKS = 0;',
-            'DROP TABLE IF EXISTS `wx_user`;',
+            "DROP TABLE IF EXISTS `$table_name`;",
 
-            'CREATE TABLE `wx_user` (' .
+            "CREATE TABLE `$table_name` (" .
             '`wx_user_id` INT(11) NOT NULL AUTO_INCREMENT,' .
             '`openid` VARCHAR(32) NOT NULL,' .
             '`nickname` VARCHAR(32) DEFAULT NULL,' .
@@ -98,6 +101,9 @@ class Wx_library
         }
     }
 
+    /**
+     * @return mixed|null|WxUser
+     */
     public function getWxUser()
     {
         if ($user = $this->loadWxUser()) {

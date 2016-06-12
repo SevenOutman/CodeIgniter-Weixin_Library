@@ -1,4 +1,6 @@
 <?php
+// 全局 config
+require_once 'WxConfig.php';
 
 // 用于获取 jsapi sign package
 require_once 'WxJsApi.php';
@@ -29,8 +31,9 @@ class Wx
         $this->secret = isset($wx_config['secret']) ? $wx_config['secret'] : '';
         $this->token  = isset($wx_config['token']) ? $wx_config['token'] : '';
 
-        $this->jsapi = WxJsApi::config($wx_config);
-        $this->oauth = WxOAuth::config($wx_config);
+        WxConfig::config($wx_config);
+        WxJsApi::config($wx_config);
+
     }
 
     /**
@@ -67,7 +70,7 @@ class Wx
     public function getUserInfo($getFullInfo = true)
     {
 
-        return $this->oauth->getUserInfo($getFullInfo);
+        return WxOAuth::getUserInfo($getFullInfo);
     }
 
     /**
@@ -78,7 +81,7 @@ class Wx
      */
     public function getSignPackage($url = '', $debug = false)
     {
-        return $this->jsapi->getSignPackage($url, $debug);
+        return WxJsApi::getSignPackage($url, $debug);
     }
 
     public static function sign($data)

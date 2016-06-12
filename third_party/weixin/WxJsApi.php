@@ -9,41 +9,15 @@ require_once 'WxException.php';
  */
 class WxJsApi
 {
-    protected $appid;
-    protected $secret;
-
-    protected static $instance;
 
     protected static $jsApiList = array();
 
     /**
-     * WxJsApi constructor.
-     * 单例模式 私有构造函数
-     *
      * @param array $wx_config
      */
-    protected function __construct(array $wx_config)
+    public static function config(array $wx_config)
     {
-        $this->appid  = isset($wx_config['appid']) ? $wx_config['appid'] : '';
-        $this->secret = isset($wx_config['secret']) ? $wx_config['secret'] : '';
-
         self::$jsApiList = array_merge(self::$jsApiList, $wx_config['js_api_list']);
-    }
-
-    /**
-     * 单例工厂
-     *
-     * @param array $config
-     *
-     * @return WxJsApi
-     */
-    public static function config(array $config)
-    {
-        if (!self::$instance) {
-            self::$instance = new WxJsApi($config);
-        }
-
-        return self::$instance;
     }
 
     /**
@@ -54,16 +28,16 @@ class WxJsApi
      *
      * @return array
      */
-    public function getSignPackage($url = '', $debug = false)
+    public static function getSignPackage($url = '', $debug = false)
     {
-        $jsapiTicket = $this->getJsApiTicket();
+        $jsapiTicket = self::getJsApiTicket();
 
         if (!$url) {
             $url = WxUrl::urlCurrent();
         }
 
         $timestamp = time();
-        $nonceStr  = $this->createNonceStr();
+        $nonceStr  = self::createNonceStr();
 
         /**
          * ksort($data);
@@ -82,7 +56,7 @@ class WxJsApi
 
         $signPackage = array(
             'debug'     => $debug,
-            "appId"     => $this->appid,
+            "appId"     => WxConfig::$appid,
             "nonceStr"  => $nonceStr,
             "timestamp" => $timestamp,
             "signature" => $signature,
@@ -92,6 +66,7 @@ class WxJsApi
         return $signPackage;
     }
 
+
     /**
      * 生成随机字符串
      *
@@ -99,7 +74,7 @@ class WxJsApi
      *
      * @return string
      */
-    private function createNonceStr($length = 16)
+    private static function createNonceStr($length = 16)
     {
         $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         $str   = "";
@@ -115,13 +90,13 @@ class WxJsApi
      * @return false|string
      * @throws WxException
      */
-    private function getJsApiTicket()
+    private static function getJsApiTicket()
     {
         if ($ticket = WxCache::getJsApiTicket()) {
             return $ticket;
         }
 
-        $accessToken = $this->getAccessToken();
+        $accessToken = self::getAccessToken();
         $url         = WxUrl::urlJsApiTicket($accessToken);
         $res         = WxUrl::curlJSON($url);
 
@@ -142,13 +117,13 @@ class WxJsApi
      * @return string
      * @throws WxException
      */
-    private function getAccessToken()
+    private static function getAccessToken()
     {
         if ($access_token = WxCache::getAccessToken()) {
             return $access_token;
         }
 
-        $url = WxUrl::urlAccessToken($this->appid, $this->secret);
+        $url = WxUrl::urlAccessToken(WxConfig::$appid, WxConfig::$secret);
         $res = WxUrl::curlJSON($url);
 
         if (!property_exists($res, 'access_token')) {

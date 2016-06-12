@@ -17,6 +17,9 @@ class WxUrl
     const URL_OAUTH_ACCESS_TOKEN = 'https://api.weixin.qq.com/sns/oauth2/access_token?grant_type=authorization_code';
     const URL_OAUTH_USER_INFO    = 'https://api.weixin.qq.com/sns/userinfo?lang=zh_CN';
 
+    // 媒体接口 URL
+    const URL_MEDIA_DOWNLOAD = 'http://file.api.weixin.qq.com/cgi-bin/media/get';
+
     /**
      * 获取当前url
      * @return string
@@ -94,6 +97,17 @@ class WxUrl
     public static function urlOAuthUserInfo($access_token, $openid)
     {
         return self::URL_OAUTH_USER_INFO . "&access_token=$access_token&openid=$openid";
+    }
+
+    /**
+     * @param $access_token
+     * @param $media_id
+     *
+     * @return string
+     */
+    public static function urlMediaDownload($access_token, $media_id)
+    {
+        return self::URL_MEDIA_DOWNLOAD . "?access_token=$access_token&media_id=$media_id";
     }
 
     /**
