@@ -34,7 +34,7 @@ class Wx_library
     protected function checkWxUserTable()
     {
         $db = $this->CI->db;
-        if ($db->table_exists('wx_user')) {
+        if ($db->table_exists($this->config['wx_user_table_name'])) {
             return true;
         }
 
